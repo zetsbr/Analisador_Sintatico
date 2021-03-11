@@ -10,13 +10,14 @@ relacao=['=','<>','>=','<=','>','<']
 reservado=operador+cmd+separador+relacao
 linha=1
 erro=[]
-token=""
 txt=open('txt.txt')
 texto=txt.read()
 texto=texto+'\n'
-i=0
+i=7
 def Analisador_Lexico(i):
+    global texto, erro, linha, reservado, relacao, separador, cmd, operador, alfabeto
     achou=False
+    token=''
     retorno=''
     while(i<len(texto) and not(achou)):
         if(texto[i]=='\n'):
@@ -75,6 +76,7 @@ def Analisador_Lexico(i):
                     achou=True
         i=i+1
     return(i,retorno)
+i,ret=Analisador_Lexico(i)
 print('\nerros: ')
 print(erro)
 
