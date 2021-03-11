@@ -71,7 +71,7 @@ def Analisador_Lexico(i):
                     token=''
         i=i+1   
     return(i,retorno)
-i,ret=Analisador_Lexico(i)
+i,ret=Analisador_Lexico(i)#ret=token se n tiver erro, se n ret=''
 print('\nerros: ')
 print(erro)
 
