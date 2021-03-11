@@ -13,7 +13,7 @@ erro=[]
 txt=open('txt.txt')
 texto=txt.read()
 texto=texto+'\n'
-i=7
+i=0
 def Analisador_Lexico(i):
     global texto, erro, linha, reservado, relacao, separador, cmd, operador, alfabeto
     achou=False
@@ -30,7 +30,6 @@ def Analisador_Lexico(i):
                 se='erro na linha {}: caracter invalido em {}'.format(linha,texto[i])
                 erro.append(se)
                 print(texto[i] + ' - ' + 'erro')
-                achou=True
             else:
                 token=token+texto[i]
                 if((texto[i+1] in separador) or (texto[i+1] in operador) or (texto[i] in separador) or (texto[i] in relacao) or (texto[i] in operador) or (texto[i+1]+texto[i+2] in separador) or (texto[i+1]+texto[i+2] in relacao) or (texto[i+1] in relacao) or (not(texto[i+1] in alfabeto) and not(texto[i+1] in reservado))):
@@ -43,9 +42,6 @@ def Analisador_Lexico(i):
                             token=token+texto[i]
                         print(token + ' - ' + token)
                         retorno=token
-                    elif(token=='end.'):
-                        print('end - end')
-                        print('. - .')
                     elif(list(filter(token.startswith,num))!= []):
                         if(not(any(l in [c for c in token] for l in ch))):
                             if('.' in token):
@@ -71,10 +67,9 @@ def Analisador_Lexico(i):
                             se='erro na linha {}:identificador mal formado em {}'.format(linha,token)
                             erro.append(se)
                             print(token + ' - ' + 'erro')
-                
-                    token=''
                     achou=True
-        i=i+1
+                    token=''
+        i=i+1   
     return(i,retorno)
 i,ret=Analisador_Lexico(i)
 print('\nerros: ')
