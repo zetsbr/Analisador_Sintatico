@@ -33,7 +33,10 @@ def Analisador_Lexico(i):
             else:
                 token=token+texto[i]
                 if((texto[i+1] in separador) or (texto[i+1] in operador) or (texto[i] in separador) or (texto[i] in relacao) or (texto[i] in operador) or (texto[i+1]+texto[i+2] in separador) or (texto[i+1]+texto[i+2] in relacao) or (texto[i+1] in relacao) or (not(texto[i+1] in alfabeto) and not(texto[i+1] in reservado))):
-                    if(token in reservado):
+                    if((token in reservado) or (token=='end.')):
+                        if(token=='end.'):
+                            i=i-1
+                            token=token[:-1]
                         if((token in relacao) and (texto[i+1] in relacao)):
                             i=i+1
                             token=token+texto[i]
