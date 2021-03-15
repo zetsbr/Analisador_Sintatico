@@ -14,6 +14,8 @@ txt=open('txt.txt')
 texto=txt.read()
 texto=texto+'\n'
 i=0
+i_ant=i
+ret=''
 def Analisador_Lexico(i):
     global texto, erro, linha, reservado, relacao, separador, cmd, operador, alfabeto
     achou=False
@@ -30,6 +32,7 @@ def Analisador_Lexico(i):
                 se='erro na linha {}: caracter invalido em {}'.format(linha,texto[i])
                 erro.append(se)
                 print(texto[i] + ' - ' + 'erro')
+                retorno='erro_lexico'
             else:
                 token=token+texto[i]
                 if((texto[i+1] in separador) or (texto[i+1] in operador) or (texto[i] in separador) or (texto[i] in relacao) or (texto[i] in operador) or (texto[i+1]+texto[i+2] in separador) or (texto[i+1]+texto[i+2] in relacao) or (texto[i+1] in relacao) or (not(texto[i+1] in alfabeto) and not(texto[i+1] in reservado))):
@@ -47,18 +50,20 @@ def Analisador_Lexico(i):
                             if('.' in token):
                                 if(not(token.endswith('.'))):
                                     print(token + ' - ' + 'real')
-                                    retorno='numero_real'
+                                    retorno='real'
                                 else:
                                     se='erro na linha {}: numero real incompleto em {}'.format(linha,token)
                                     erro.append(se)
                                     print(token + ' - ' + 'erro')
+                                    retorno='erro_lexico'
                             else:
                                 print(token + ' - ' + 'inteiro')
-                                retorno='numero_int'
+                                retorno='integer'
                         else:
                             se='erro na linha {}: numero mal formado em {}'.format(linha,token)
                             erro.append(se)
                             print(token + ' - ' + 'erro')
+                            retorno='erro_lexico'
                     else:
                         if(not('.' in token)):
                             print(token + ' - ' + 'identificador')
@@ -67,11 +72,322 @@ def Analisador_Lexico(i):
                             se='erro na linha {}:identificador mal formado em {}'.format(linha,token)
                             erro.append(se)
                             print(token + ' - ' + 'erro')
+                            retorno='erro_lexico'
                     achou=True
                     token=''
         i=i+1   
     return(i,retorno)
-i,ret=Analisador_Lexico(i)#ret=token se n tiver erro, se n ret=''
+
+def comandos():
+    global i,ret,i_ant
+    if(ret=='read' or ret=='write' or ret=='while' or ret=='if' or ret=='ident' or ret=='begin'):
+        cmd()
+        i_ant=i
+        i,ret=Analisador_Lexico(i)
+        if(not(ret==';')):
+            se='erro na linha {}: esperado ";" mas foi obtido "{}"'.format(linha,ret)
+            erro.append(se)
+        i_ant=i
+        i,ret=Analisador_Lexico(i)
+        comandos()
+    else:
+        i=i_ant
+        
+def cmd():
+    global i,ret,i_ant
+    if(ret=='read'):
+        if(not(ret=='(')):
+            se='erro na linha {}: esperado "(" mas foi obtido "{}"'.format(linha,ret)
+            erro.append(se)
+        i_ant=i
+        i,ret=Analisador_Lexico(i)
+        variaveis()
+        i_ant=i
+        i,ret=Analisador_Lexico(i)
+        if(not(ret==')')):
+            se='erro na linha {}: esperado ")" mas foi obtido "{}"'.format(linha,ret)
+            erro.append(se)
+    elif(ret=='write'):
+        if(not(ret=='(')):
+            se='erro na linha {}: esperado "(" mas foi obtido "{}"'.format(linha,ret)
+            erro.append(se)
+        i_ant=i
+        i,ret=Analisador_Lexico(i)
+        variaveis()
+        i_ant=i
+        i,ret=Analisador_Lexico(i)
+        if(not(ret==')')):
+            se='erro na linha {}: esperado ")" mas foi obtido "{}"'.format(linha,ret)
+            erro.append(se)
+    elif(ret=='while'):
+        condicao()
+        i_ant=i
+        i,ret=Analisador_Lexico(i)
+        if(not(ret=='do')):
+            se='erro na linha {}: esperado "do" mas foi obtido "{}"'.format(linha,ret)
+            erro.append(se)
+        i_ant=i
+        i,ret=Analisador_Lexico(i)
+        cmd()
+    elif(ret=='if'):
+        condicao()
+        i_ant=i
+        i,ret=Analisador_Lexico(i)
+        if(not(ret=='then')):
+            se='erro na linha {}: esperado "then" mas foi obtido "{}"'.format(linha,ret)
+            erro.append(se)
+        i_ant=i
+        i,ret=Analisador_Lexico(i)
+        cmd()
+        i_ant=i
+        i,ret=Analisador_Lexico(i)
+        pfalsa()
+    elif(ret=='ident'):
+        i_ant=i
+        i,ret=Analisador_Lexico(i)
+        if(ret==':='):
+            i_ant=i
+            i,ret=Analisador_Lexico(i)
+            expressao()
+        else:
+            lista_arg()
+    elif(ret=='begin'):
+        i_ant=i
+        i,ret=Analisador_Lexico(i)
+        comandos()
+        i_ant=i
+        i,ret=Analisador_Lexico(i)
+        if(not(ret=='end')):
+            se='erro na linha {}: esperado "end" mas foi obtido "{}"'.format(linha,ret)
+            erro.append(se)
+    
+def lista_arg():
+    global i,ret,i_ant
+    if(ret=='('):
+        i_ant=i
+        i,ret=Analisador_Lexico(i)
+        argumentos()
+        i_ant=i
+        i,ret=Analisador_Lexico(i)
+        if(not(ret==')')):
+            se='erro na linha {}: esperado ")" mas foi obtido "{}"'.format(linha,ret)
+            erro.append(se)
+    else:
+        i=i_ant
+
+def mais_ident():
+    global i,ret,i_ant
+    if(ret==';'):
+        i_ant=i
+        i,ret=Analisador_Lexico(i)
+        argumentos()
+    else:
+        i=i_ant
+
+def pfalsa():
+    global i,ret,i_ant
+    if(ret=='else'):
+        i_ant=i
+        i,ret=Analisador_Lexico(i)
+        cmd()
+    else:
+        i=i_ant
+
+def argumentos():
+    global i,ret,i_ant
+    if(not(ret=='ident')):
+        se='erro na linha {}: esperado "ident" mas foi obtido "{}"'.format(linha,ret)
+        erro.append(se)
+    i_ant=i
+    i,ret=Analisador_Lexico(i)
+    mais_ident()
+
+def tipo_var():
+    global i,ret,i_ant
+    if(not(ret=='integer' or ret=='real')):
+        se='erro na linha {}: esperado "integer" ou "real" mas foi obtido "{}"'.format(linha,ret)
+        erro.append(se)
+
+def mais_var():
+    global i,ret,i_ant
+    if(ret==','):
+        i_ant=i
+        i,ret=Analisador_Lexico(i)
+        variaveis()
+    else:
+        i=i_ant
+        
+def variaveis():
+    global i,ret,i_ant
+    if(not(ret=='ident')):
+        se='erro na linha {}: esperado "ident" mas foi obtido "{}"'.format(linha,ret)
+        erro.append(se)
+    i_ant=i
+    i,ret=Analisador_Lexico(i)
+    mais_var()
+
+def dc_v():
+    global i,ret,i_ant
+    if(ret=='var'):
+        i_ant=i
+        i,ret=Analisador_Lexico(i)
+        variaveis()
+        i_ant=i
+        i,ret=Analisador_Lexico(i)
+        if(not(ret==':')):
+            se='erro na linha {}: esperado ":" mas foi obtido "{}"'.format(linha,ret)
+            erro.append(se)
+        i_ant=i
+        i,ret=Analisador_Lexico(i)
+        tipo_var()
+        i_ant=i
+        i,ret=Analisador_Lexico(i)
+        dc_v()
+    else:
+        i=i_ant
+
+def lista_par():
+    global i,ret,i_ant
+    variaveis()
+    i_ant=i
+    i,ret=Analisador_Lexico(i)
+    if(not(ret==':')):
+        se='erro na linha {}: esperado ":" mas foi obtido "{}"'.format(linha,ret)
+        erro.append(se)
+    i_ant=i
+    i,ret=Analisador_Lexico(i)
+    tipo_var()
+    i_ant=i
+    i,ret=Analisador_Lexico(i)
+    mais_par()
+
+def mais_par():
+    global i,ret,i_ant
+    if(ret==';'):
+        i_ant=i
+        i,ret=Analisador_Lexico(i)
+        lista_par()
+    else:
+        i=i_ant
+
+def parametros():
+    global i,ret,i_ant
+    if(ret=='('):
+        i_ant=i
+        i,ret=Analisador_Lexico(i)
+        lista_par()
+        i_ant=i
+        i,ret=Analisador_Lexico(i)
+        if(not(ret==')')):
+            se='erro na linha {}: esperado ")" mas foi obtido "{}"'.format(linha,ret)
+            erro.append(se)
+    else:
+        i=i_ant
+
+def dc_loc():
+    global i,ret,i_ant
+    dc_v()
+
+def corpo_p():
+    global i,ret,i_ant
+    dc_loc()
+    i_ant=i
+    i,ret=Analisador_Lexico(i)
+    if(not(ret=='begin')):
+        se='erro na linha {}: esperado "begin" mas foi obtido "{}"'.format(linha,ret)
+        erro.append(se)
+    i_ant=i
+    i,ret=Analisador_Lexico(i)
+    comandos()
+    i_ant=i
+    i,ret=Analisador_Lexico(i)
+    if(not(ret=='end')):
+        se='erro na linha {}: esperado "end" mas foi obtido "{}"'.format(linha,ret)
+        erro.append(se)
+    i_ant=i
+    i,ret=Analisador_Lexico(i)
+    if(not(ret==';')):
+        se='erro na linha {}: esperado ";" mas foi obtido "{}"'.format(linha,ret)
+        erro.append(se)
+
+def dc_p():
+    global i,ret,i_ant
+    if(ret=='procedure'):
+        i_ant=i
+        i,ret=Analisador_Lexico(i)
+        if(not(ret=='ident')):
+            se='erro na linha {}: esperado "ident" mas foi obtido "{}"'.format(linha,ret)
+            erro.append(se)
+        i_ant=i
+        i,ret=Analisador_Lexico(i)
+        parametros()
+        i_ant=i
+        i,ret=Analisador_Lexico(i)
+        if(not(ret==';')):
+            se='erro na linha {}: esperado ";" mas foi obtido "{}"'.format(linha,ret)
+            erro.append(se)
+        i_ant=i
+        i,ret=Analisador_Lexico(i)
+        corpo_p()
+        i_ant=i
+        i,ret=Analisador_Lexico(i)
+        dc_p()
+    else:
+        i=i_ant
+
+def dc():
+    global i,ret,i_ant
+    if(ret=='var' or ret=='procedure'):
+        dc_v()
+        dc_p()
+    else:
+        se='erro na linha {}: esperado "var" ou "procedure" mas foi obtido "{}"'.format(linha,ret)
+        erro.append(se)
+
+def corpo():
+    global i,ret,i_ant
+    dc()
+    i_ant=i
+    i,ret=Analisador_Lexico(i)
+    if(not(ret=='begin')):
+        se='erro na linha {}: esperado "begin" mas foi obtido "{}"'.format(linha,ret)
+        erro.append(se)
+    i_ant=i
+    i,ret=Analisador_Lexico(i)
+    comandos()
+    i_ant=i
+    i,ret=Analisador_Lexico(i)
+    if(not(ret=='end')):
+        se='erro na linha {}: esperado "end" mas foi obtido "{}"'.format(linha,ret)
+        erro.append(se)
+    
+def programa():
+    global i, ret,i_ant
+    i_ant=i
+    i,ret=Analisador_Lexico(i)
+    if(not(ret=='program')):
+        se='erro na linha {}: esperado "program" mas foi obtido "{}"'.format(linha,ret)
+        erro.append(se)
+    i_ant=i
+    i,ret=Analisador_Lexico(i)
+    if(not(ret=='ident')):
+        se='erro na linha {}: esperado "ident" mas foi obtido "{}"'.format(linha,ret)
+        erro.append(se)
+    i_ant=i
+    i,ret=Analisador_Lexico(i)
+    if(not(ret==';')):
+        se='erro na linha {}: esperado ";" mas foi obtido "{}"'.format(linha,ret)
+        erro.append(se)
+    i_ant=i
+    i,ret=Analisador_Lexico(i)
+    corpo()
+    i_ant=i
+    i,ret=Analisador_Lexico(i)
+    if(not(ret=='.')):
+        se='erro na linha {}: esperado "." mas foi obtido "{}"'.format(linha,ret)
+        erro.append(se)
+        
 print('\nerros: ')
 print(erro)
 
+#de condicao pra frente falta ainda
