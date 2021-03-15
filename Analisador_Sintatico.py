@@ -78,6 +78,36 @@ def Analisador_Lexico(i):
         i=i+1   
     return(i,retorno)
 
+def fator():
+    global i,ret,i_ant
+
+def op_mul():
+    global i,ret,i_ant
+
+def mais_fatores():
+    global i,ret,i_ant
+
+def termo():
+    global i,ret,i_ant
+
+def op_ad():
+    global i,ret,i_ant
+
+def outros_termos():
+    global i,ret,i_ant
+
+def op_un():
+    global i,ret,i_ant
+
+def expressao():
+    global i,ret,i_ant
+
+def relacao():
+    global i,ret,i_ant
+
+def condicao():
+    global i,ret,i_ant
+
 def comandos():
     global i,ret,i_ant
     if(ret=='read' or ret=='write' or ret=='while' or ret=='if' or ret=='ident' or ret=='begin'):
@@ -390,4 +420,4 @@ def programa():
 print('\nerros: ')
 print(erro)
 
-#de condicao pra frente falta ainda
+#de condicao pra frente falta aindaa
