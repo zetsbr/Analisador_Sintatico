@@ -6,10 +6,11 @@ alfabeto=ch+num
 operador=['+','-','*','/']
 cmd=['read','write','if','then','else','while','do','begin','end','procedure','program','real','integer','var']
 separador=[' ','(',')',',',';',':=',':','\n','{','}']
-relacao=['=','<>','>=','<=','>','<']
-reservado=operador+cmd+separador+relacao
+relacional=['=','<>','>=','<=','>','<']
+reservado=operador+cmd+separador+relacional
 linha=1
 erro=[]
+token=""
 txt=open('txt.txt')
 texto=txt.read()
 texto=texto+'\n'
@@ -17,7 +18,7 @@ i=0
 i_ant=i
 ret=''
 def Analisador_Lexico(i):
-    global texto, erro, linha, reservado, relacao, separador, cmd, operador, alfabeto
+    global texto, erro, linha, reservado, relacional, separador, cmd, operador, alfabeto
     achou=False
     token=''
     retorno=''
@@ -35,12 +36,12 @@ def Analisador_Lexico(i):
                 retorno='erro_lexico'
             else:
                 token=token+texto[i]
-                if((texto[i+1] in separador) or (texto[i+1] in operador) or (texto[i] in separador) or (texto[i] in relacao) or (texto[i] in operador) or (texto[i+1]+texto[i+2] in separador) or (texto[i+1]+texto[i+2] in relacao) or (texto[i+1] in relacao) or (not(texto[i+1] in alfabeto) and not(texto[i+1] in reservado))):
+                if((texto[i+1] in separador) or (texto[i+1] in operador) or (texto[i] in separador) or (texto[i] in relacional) or (texto[i] in operador) or (texto[i+1]+texto[i+2] in separador) or (texto[i+1]+texto[i+2] in relacional) or (texto[i+1] in relacional) or (not(texto[i+1] in alfabeto) and not(texto[i+1] in reservado))):
                     if((token in reservado) or (token=='end.') or (token=='.')):
                         if(token=='end.'):
                             i=i-1
                             token=token[:-1]
-                        if((token in relacao) and (texto[i+1] in relacao)):
+                        if((token in relacional) and (texto[i+1] in relacao)):
                             i=i+1
                             token=token+texto[i]
                         print(token + ' - ' + token)
