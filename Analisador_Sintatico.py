@@ -80,33 +80,95 @@ def Analisador_Lexico(i):
 
 def fator():
     global i,ret,i_ant
+    if(ret=='(' or ret=='ident' or ret=='integer' or ret=='real'):
+        if(ret=='('):
+            i_ant=i
+            i,ret=Analisador_Lexico(i)
+            expressao()
+            i_ant=i
+            i,ret=Analisador_Lexico(i)
+            if(not(ret==')')):
+                se='erro na linha {}: esperado ")" mas foi obtido "{}"'.format(linha,ret)
+                erro.append(se)
+    else:
+        se='erro na linha {}: esperado "(" ou "ident" ou "integer" ou "real" mas foi obtido "{}"'.format(linha,ret)
+        erro.append(se)
 
 def op_mul():
     global i,ret,i_ant
+    if(not(ret=='*' or ret=='/')):
+        se='erro na linha {}: esperado "*" ou "/" mas foi obtido "{}"'.format(linha,ret)
+        erro.append(se)
 
 def mais_fatores():
     global i,ret,i_ant
+    if(ret=='*' or ret=='/'):
+        op_mul()
+        i_ant=i
+        i,ret=Analisador_Lexico(i)
+        fator()
+        i_ant=i
+        i,ret=Analisador_Lexico(i)
+        mais_fatores()
+    else:
+        i=i_ant
 
 def termo():
     global i,ret,i_ant
+    op_un()
+    i_ant=i
+    i,ret=Analisador_Lexico(i)
+    fator()
+    i_ant=i
+    i,ret=Analisador_Lexico(i)
+    mais_fatores()
 
 def op_ad():
     global i,ret,i_ant
+    if(not(ret=='+' or ret=='-')):
+        se='erro na linha {}: esperado "+" ou "-" mas foi obtido "{}"'.format(linha,ret)
+        erro.append(se)
 
 def outros_termos():
     global i,ret,i_ant
+    if(ret=='+' or ret=='-'):
+        op_ad()
+        i_ant=i
+        i,ret=Analisador_Lexico(i)
+        termo()
+        i_ant=i
+        i,ret=Analisador_Lexico(i)
+        outros_termos()
+    else:
+        i=i_ant
 
 def op_un():
     global i,ret,i_ant
+    if(not(ret=='+' or ret=='-')):
+        i=i_ant
 
 def expressao():
     global i,ret,i_ant
+    termo()
+    i_ant=i
+    i,ret=Analisador_Lexico(i)
+    outros_termos()
 
 def relacao():
     global i,ret,i_ant
+    if(not(ret=='=' or ret=='<>' or ret=='>=' or ret=='<=' or ret=='>' or ret=='<')):
+        se='erro na linha {}: esperado "=" ou "<>" ou ">=" ou "<=" ou ">" ou "<" mas foi obtido "{}"'.format(linha,ret)
+        erro.append(se)
 
 def condicao():
     global i,ret,i_ant
+    expressao()
+    i_ant=i
+    i,ret=Analisador_Lexico(i)
+    relacao()
+    i_ant=i
+    i,ret=Analisador_Lexico(i)
+    expressao()
 
 def comandos():
     global i,ret,i_ant
