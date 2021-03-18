@@ -32,7 +32,6 @@ def Analisador_Lexico(i):
             if(not(texto[i] in alfabeto) and not(texto[i] in reservado)):
                 se='erro na linha {}: caracter invalido em {}'.format(linha,texto[i])
                 erro.append(se)
-                print(texto[i] + ' - ' + 'erro')
                 retorno='erro_lexico'
             else:
                 token=token+texto[i]
@@ -44,18 +43,15 @@ def Analisador_Lexico(i):
                         if((token in relacional) and (texto[i+1] in relacional) or (token+texto[i+1] in separador)):
                             i=i+1
                             token=token+texto[i]
-                        print(token + ' - ' + token)
                         retorno=token
                     elif(list(filter(token.startswith,num))!= []):
                         if(not(any(l in [c for c in token] for l in ch))):
                             if('.' in token):
                                 if(not(token.endswith('.'))):
-                                    print(token + ' - ' + 'real')
                                     retorno='real'
                                 else:
                                     se='erro na linha {}: numero real incompleto em {}'.format(linha,token)
                                     erro.append(se)
-                                    print(token + ' - ' + 'erro')
                                     retorno='erro_lexico'
                             else:
                                 print(token + ' - ' + 'inteiro')
@@ -63,31 +59,35 @@ def Analisador_Lexico(i):
                         else:
                             se='erro na linha {}: numero mal formado em {}'.format(linha,token)
                             erro.append(se)
-                            print(token + ' - ' + 'erro')
                             retorno='erro_lexico'
                     else:
                         if(not('.' in token)):
-                            print(token + ' - ' + 'identificador')
                             retorno='ident'
                         else:
                             se='erro na linha {}:identificador mal formado em {}'.format(linha,token)
                             erro.append(se)
-                            print(token + ' - ' + 'erro')
                             retorno='erro_lexico'
                     achou=True
                     token=''
         i=i+1   
     return(i,retorno)
 
+
+def consome_simbolo():
+    global i,ret,i_ant
+    i_ant=i
+    i,ret=Analisador_Lexico(i)
+    while(ret=='erro_lexico'):
+        i_ant=i
+        i,ret=Analisador_Lexico(i)
+
 def fator():
     global i,ret,i_ant
     if(ret=='(' or ret=='ident' or ret=='integer' or ret=='real'):
         if(ret=='('):
-            i_ant=i
-            i,ret=Analisador_Lexico(i)
+            consome_simbolo()
             expressao()
-            i_ant=i
-            i,ret=Analisador_Lexico(i)
+            consome_simbolo()
             if(not(ret==')')):
                 se='erro na linha {}: esperado ")" mas foi obtido "{}"'.format(linha,ret)
                 erro.append(se)
@@ -105,11 +105,9 @@ def mais_fatores():
     global i,ret,i_ant
     if(ret=='*' or ret=='/'):
         op_mul()
-        i_ant=i
-        i,ret=Analisador_Lexico(i)
+        consome_simbolo()
         fator()
-        i_ant=i
-        i,ret=Analisador_Lexico(i)
+        consome_simbolo()
         mais_fatores()
     else:
         i=i_ant
@@ -117,11 +115,9 @@ def mais_fatores():
 def termo():
     global i,ret,i_ant
     op_un()
-    i_ant=i
-    i,ret=Analisador_Lexico(i)
+    consome_simbolo()
     fator()
-    i_ant=i
-    i,ret=Analisador_Lexico(i)
+    consome_simbolo()
     mais_fatores()
 
 def op_ad():
@@ -134,11 +130,9 @@ def outros_termos():
     global i,ret,i_ant
     if(ret=='+' or ret=='-'):
         op_ad()
-        i_ant=i
-        i,ret=Analisador_Lexico(i)
+        consome_simbolo()
         termo()
-        i_ant=i
-        i,ret=Analisador_Lexico(i)
+        consome_simbolo()
         outros_termos()
     else:
         i=i_ant
@@ -151,8 +145,7 @@ def op_un():
 def expressao():
     global i,ret,i_ant
     termo()
-    i_ant=i
-    i,ret=Analisador_Lexico(i)
+    consome_simbolo()
     outros_termos()
 
 def relacao():
@@ -164,24 +157,20 @@ def relacao():
 def condicao():
     global i,ret,i_ant
     expressao()
-    i_ant=i
-    i,ret=Analisador_Lexico(i)
+    consome_simbolo()
     relacao()
-    i_ant=i
-    i,ret=Analisador_Lexico(i)
+    consome_simbolo()
     expressao()
 
 def comandos():
     global i,ret,i_ant
     if(ret=='read' or ret=='write' or ret=='while' or ret=='if' or ret=='ident' or ret=='begin'):
         cmd()
-        i_ant=i
-        i,ret=Analisador_Lexico(i)
+        consome_simbolo()
         if(not(ret==';')):
             se='erro na linha {}: esperado ";" mas foi obtido "{}"'.format(linha,ret)
             erro.append(se)
-        i_ant=i
-        i,ret=Analisador_Lexico(i)
+        consome_simbolo()
         comandos()
     else:
         i=i_ant
@@ -189,75 +178,58 @@ def comandos():
 def cmd():
     global i,ret,i_ant
     if(ret=='read'):
-        i_ant=i
-        i,ret=Analisador_Lexico(i)
+        consome_simbolo()
         if(not(ret=='(')):
             se='erro na linha {}: esperado "(" mas foi obtido "{}"'.format(linha,ret)
             erro.append(se)
-        i_ant=i
-        i,ret=Analisador_Lexico(i)
+        consome_simbolo()
         variaveis()
-        i_ant=i
-        i,ret=Analisador_Lexico(i)
+        consome_simbolo()
         if(not(ret==')')):
             se='erro na linha {}: esperado ")" mas foi obtido "{}"'.format(linha,ret)
             erro.append(se)
     elif(ret=='write'):
-        i_ant=i
-        i,ret=Analisador_Lexico(i)
+        consome_simbolo()
         if(not(ret=='(')):
             se='erro na linha {}: esperado "(" mas foi obtido "{}"'.format(linha,ret)
             erro.append(se)
-        i_ant=i
-        i,ret=Analisador_Lexico(i)
+        consome_simbolo()
         variaveis()
-        i_ant=i
-        i,ret=Analisador_Lexico(i)
+        consome_simbolo()
         if(not(ret==')')):
             se='erro na linha {}: esperado ")" mas foi obtido "{}"'.format(linha,ret)
             erro.append(se)
     elif(ret=='while'):
-        i_ant=i
-        i,ret=Analisador_Lexico(i)
+        consome_simbolo()
         condicao()
-        i_ant=i
-        i,ret=Analisador_Lexico(i)
+        consome_simbolo()
         if(not(ret=='do')):
             se='erro na linha {}: esperado "do" mas foi obtido "{}"'.format(linha,ret)
             erro.append(se)
-        i_ant=i
-        i,ret=Analisador_Lexico(i)
+        consome_simbolo()
         cmd()
     elif(ret=='if'):
-        i_ant=i
-        i,ret=Analisador_Lexico(i)
+        consome_simbolo()
         condicao()
-        i_ant=i
-        i,ret=Analisador_Lexico(i)
+        consome_simbolo()
         if(not(ret=='then')):
             se='erro na linha {}: esperado "then" mas foi obtido "{}"'.format(linha,ret)
             erro.append(se)
-        i_ant=i
-        i,ret=Analisador_Lexico(i)
+        consome_simbolo()
         cmd()
-        i_ant=i
-        i,ret=Analisador_Lexico(i)
+        consome_simbolo()
         pfalsa()
     elif(ret=='ident'):
-        i_ant=i
-        i,ret=Analisador_Lexico(i)
+        consome_simbolo()
         if(ret==':='):
-            i_ant=i
-            i,ret=Analisador_Lexico(i)
+            consome_simbolo()
             expressao()
         else:
             lista_arg()
     elif(ret=='begin'):
-        i_ant=i
-        i,ret=Analisador_Lexico(i)
+        consome_simbolo()
         comandos()
-        i_ant=i
-        i,ret=Analisador_Lexico(i)
+        consome_simbolo()
         if(not(ret=='end')):
             se='erro na linha {}: esperado "end" mas foi obtido "{}"'.format(linha,ret)
             erro.append(se)
@@ -265,11 +237,9 @@ def cmd():
 def lista_arg():
     global i,ret,i_ant
     if(ret=='('):
-        i_ant=i
-        i,ret=Analisador_Lexico(i)
+        consome_simbolo()
         argumentos()
-        i_ant=i
-        i,ret=Analisador_Lexico(i)
+        consome_simbolo()
         if(not(ret==')')):
             se='erro na linha {}: esperado ")" mas foi obtido "{}"'.format(linha,ret)
             erro.append(se)
@@ -279,8 +249,7 @@ def lista_arg():
 def mais_ident():
     global i,ret,i_ant
     if(ret==';'):
-        i_ant=i
-        i,ret=Analisador_Lexico(i)
+        consome_simbolo()
         argumentos()
     else:
         i=i_ant
@@ -288,8 +257,7 @@ def mais_ident():
 def pfalsa():
     global i,ret,i_ant
     if(ret=='else'):
-        i_ant=i
-        i,ret=Analisador_Lexico(i)
+        consome_simbolo()
         cmd()
     else:
         i=i_ant
@@ -299,8 +267,7 @@ def argumentos():
     if(not(ret=='ident')):
         se='erro na linha {}: esperado "ident" mas foi obtido "{}"'.format(linha,ret)
         erro.append(se)
-    i_ant=i
-    i,ret=Analisador_Lexico(i)
+    consome_simbolo()
     mais_ident()
 
 def tipo_var():
@@ -312,8 +279,7 @@ def tipo_var():
 def mais_var():
     global i,ret,i_ant
     if(ret==','):
-        i_ant=i
-        i,ret=Analisador_Lexico(i)
+        consome_simbolo()
         variaveis()
     else:
         i=i_ant
@@ -323,55 +289,45 @@ def variaveis():
     if(not(ret=='ident')):
         se='erro na linha {}: esperado "ident" mas foi obtido "{}"'.format(linha,ret)
         erro.append(se)
-    i_ant=i
-    i,ret=Analisador_Lexico(i)
+    consome_simbolo()
     mais_var()
 
 def dc_v():
     global i,ret,i_ant
     if(ret=='var'):
-        i_ant=i
-        i,ret=Analisador_Lexico(i)
+        consome_simbolo()
         variaveis()
-        i_ant=i
-        i,ret=Analisador_Lexico(i)
+        consome_simbolo()
         if(not(ret==':')):
             se='erro na linha {}: esperado ":" mas foi obtido "{}"'.format(linha,ret)
             erro.append(se)
-        i_ant=i
-        i,ret=Analisador_Lexico(i)
+        consome_simbolo()
         tipo_var()
-        i_ant=i
-        i,ret=Analisador_Lexico(i)
+        consome_simbolo()
         if(not(ret==';')):
             se='erro na linha {}: esperado ";" mas foi obtido "{}"'.format(linha,ret)
             erro.append(se)
-        i_ant=i
-        i,ret=Analisador_Lexico(i)
+        consome_simbolo()
         dc_v()
-    else:
+    elif(not(ret=='procedure')):
         i=i_ant
 
 def lista_par():
     global i,ret,i_ant
     variaveis()
-    i_ant=i
-    i,ret=Analisador_Lexico(i)
+    consome_simbolo()
     if(not(ret==':')):
         se='erro na linha {}: esperado ":" mas foi obtido "{}"'.format(linha,ret)
         erro.append(se)
-    i_ant=i
-    i,ret=Analisador_Lexico(i)
+    consome_simbolo()
     tipo_var()
-    i_ant=i
-    i,ret=Analisador_Lexico(i)
+    consome_simbolo()
     mais_par()
 
 def mais_par():
     global i,ret,i_ant
     if(ret==';'):
-        i_ant=i
-        i,ret=Analisador_Lexico(i)
+        consome_simbolo()
         lista_par()
     else:
         i=i_ant
@@ -379,11 +335,9 @@ def mais_par():
 def parametros():
     global i,ret,i_ant
     if(ret=='('):
-        i_ant=i
-        i,ret=Analisador_Lexico(i)
+        consome_simbolo()
         lista_par()
-        i_ant=i
-        i,ret=Analisador_Lexico(i)
+        consome_simbolo()
         if(not(ret==')')):
             se='erro na linha {}: esperado ")" mas foi obtido "{}"'.format(linha,ret)
             erro.append(se)
@@ -397,21 +351,17 @@ def dc_loc():
 def corpo_p():
     global i,ret,i_ant
     dc_loc()
-    i_ant=i
-    i,ret=Analisador_Lexico(i)
+    consome_simbolo()
     if(not(ret=='begin')):
         se='erro na linha {}: esperado "begin" mas foi obtido "{}"'.format(linha,ret)
         erro.append(se)
-    i_ant=i
-    i,ret=Analisador_Lexico(i)
+    consome_simbolo()
     comandos()
-    i_ant=i
-    i,ret=Analisador_Lexico(i)
+    consome_simbolo()
     if(not(ret=='end')):
         se='erro na linha {}: esperado "end" mas foi obtido "{}"'.format(linha,ret)
         erro.append(se)
-    i_ant=i
-    i,ret=Analisador_Lexico(i)
+    consome_simbolo()
     if(not(ret==';')):
         se='erro na linha {}: esperado ";" mas foi obtido "{}"'.format(linha,ret)
         erro.append(se)
@@ -419,26 +369,19 @@ def corpo_p():
 def dc_p():
     global i,ret,i_ant
     if(ret=='procedure'):
-        i_ant=i
-        i,ret=Analisador_Lexico(i)
-        i_ant=i
-        i,ret=Analisador_Lexico(i)
+        consome_simbolo()
         if(not(ret=='ident')):
             se='erro na linha {}: esperado "ident" mas foi obtido "{}"'.format(linha,ret)
             erro.append(se)
-        i_ant=i
-        i,ret=Analisador_Lexico(i)
+        consome_simbolo()
         parametros()
-        i_ant=i
-        i,ret=Analisador_Lexico(i)
+        consome_simbolo()
         if(not(ret==';')):
             se='erro na linha {}: esperado ";" mas foi obtido "{}"'.format(linha,ret)
             erro.append(se)
-        i_ant=i
-        i,ret=Analisador_Lexico(i)
+        consome_simbolo()
         corpo_p()
-        i_ant=i
-        i,ret=Analisador_Lexico(i)
+        consome_simbolo()
         dc_p()
     else:
         i=i_ant
@@ -455,42 +398,34 @@ def dc():
 def corpo():
     global i,ret,i_ant
     dc()
-    i_ant=i
-    i,ret=Analisador_Lexico(i)
+    consome_simbolo()
     if(not(ret=='begin')):
         se='erro na linha {}: esperado "begin" mas foi obtido "{}"'.format(linha,ret)
         erro.append(se)
-    i_ant=i
-    i,ret=Analisador_Lexico(i)
+    consome_simbolo()
     comandos()
-    i_ant=i
-    i,ret=Analisador_Lexico(i)
+    consome_simbolo()
     if(not(ret=='end')):
         se='erro na linha {}: esperado "end" mas foi obtido "{}"'.format(linha,ret)
         erro.append(se)
     
 def programa():
     global i, ret,i_ant
-    i_ant=i
-    i,ret=Analisador_Lexico(i)
+    consome_simbolo()
     if(not(ret=='program')):
         se='erro na linha {}: esperado "program" mas foi obtido "{}"'.format(linha,ret)
         erro.append(se)
-    i_ant=i
-    i,ret=Analisador_Lexico(i)
+    consome_simbolo()
     if(not(ret=='ident')):
         se='erro na linha {}: esperado "ident" mas foi obtido "{}"'.format(linha,ret)
         erro.append(se)
-    i_ant=i
-    i,ret=Analisador_Lexico(i)
+    consome_simbolo()
     if(not(ret==';')):
         se='erro na linha {}: esperado ";" mas foi obtido "{}"'.format(linha,ret)
         erro.append(se)
-    i_ant=i
-    i,ret=Analisador_Lexico(i)
+    consome_simbolo()
     corpo()
-    i_ant=i
-    i,ret=Analisador_Lexico(i)
+    consome_simbolo()
     if(not(ret=='.')):
         se='erro na linha {}: esperado "." mas foi obtido "{}"'.format(linha,ret)
         erro.append(se)
