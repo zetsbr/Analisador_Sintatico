@@ -1,13 +1,19 @@
-program nome1;
-{exemplo 1}
-var a, a1, b: real;
+program nome2;
+{exemplo 2}
+var a: real;
+var b: integer;
+procedure nomep(x: real);
+var a, c: integer;
 begin
-read(a, b);
-a1:= a + b;
-while a1>a do
+read(c, a);
+if a<x+c then
 begin
-write(a1);
-a1:= a1-1;
+a:= c+x;
+write(a);
+end
+else c:= a+x;
 end;
-if a<= b then write(a);
+begin {programa principal}
+read(b);
+nomep(b);
 end. 

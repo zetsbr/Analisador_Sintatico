@@ -32,7 +32,7 @@ def Analisador_Lexico(i):
             if(not(texto[i] in alfabeto) and not(texto[i] in reservado)):
                 se='erro na linha {}: caracter invalido em {}'.format(linha,texto[i])
                 erro.append(se)
-                #print(texto[i] + ' - ' + 'erro')
+                print(texto[i] + ' - ' + 'erro')
                 retorno='erro_lexico'
             else:
                 token=token+texto[i]
@@ -44,35 +44,35 @@ def Analisador_Lexico(i):
                         if((token in relacional) and (texto[i+1] in relacional) or (token+texto[i+1] in separador)):
                             i=i+1
                             token=token+texto[i]
-                        #print(token + ' - ' + token)
+                        print(token + ' - ' + token)
                         retorno=token
                     elif(list(filter(token.startswith,num))!= []):
                         if(not(any(l in [c for c in token] for l in ch))):
                             if('.' in token):
                                 if(not(token.endswith('.'))):
-                                    #print(token + ' - ' + 'real')
+                                    print(token + ' - ' + 'real')
                                     retorno='real'
                                 else:
                                     se='erro na linha {}: numero real incompleto em {}'.format(linha,token)
                                     erro.append(se)
-                                    #print(token + ' - ' + 'erro')
+                                    print(token + ' - ' + 'erro')
                                     retorno='erro_lexico'
                             else:
-                                #print(token + ' - ' + 'inteiro')
+                                print(token + ' - ' + 'inteiro')
                                 retorno='integer'
                         else:
                             se='erro na linha {}: numero mal formado em {}'.format(linha,token)
                             erro.append(se)
-                            #print(token + ' - ' + 'erro')
+                            print(token + ' - ' + 'erro')
                             retorno='erro_lexico'
                     else:
                         if(not('.' in token)):
-                            #print(token + ' - ' + 'identificador')
+                            print(token + ' - ' + 'identificador')
                             retorno='ident'
                         else:
                             se='erro na linha {}:identificador mal formado em {}'.format(linha,token)
                             erro.append(se)
-                            #print(token + ' - ' + 'erro')
+                            print(token + ' - ' + 'erro')
                             retorno='erro_lexico'
                     achou=True
                     token=''
@@ -188,7 +188,6 @@ def comandos():
         
 def cmd():
     global i,ret,i_ant
-    print(ret)
     if(ret=='read'):
         i_ant=i
         i,ret=Analisador_Lexico(i)
@@ -254,8 +253,6 @@ def cmd():
         else:
             lista_arg()
     elif(ret=='begin'):
-        i_ant=i
-        i,ret=Analisador_Lexico(i)
         i_ant=i
         i,ret=Analisador_Lexico(i)
         comandos()
@@ -424,6 +421,8 @@ def dc_p():
     if(ret=='procedure'):
         i_ant=i
         i,ret=Analisador_Lexico(i)
+        i_ant=i
+        i,ret=Analisador_Lexico(i)
         if(not(ret=='ident')):
             se='erro na linha {}: esperado "ident" mas foi obtido "{}"'.format(linha,ret)
             erro.append(se)
@@ -492,14 +491,12 @@ def programa():
     corpo()
     i_ant=i
     i,ret=Analisador_Lexico(i)
-    print(linha)
     if(not(ret=='.')):
         se='erro na linha {}: esperado "." mas foi obtido "{}"'.format(linha,ret)
         erro.append(se)
 
 #i_ant=i
 #i,ret=Analisador_Lexico(i)
-#print(ret)
 programa()
 print('\nerros: ')
 for er in erro:
