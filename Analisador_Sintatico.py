@@ -32,7 +32,7 @@ def Analisador_Lexico(i):
             if(not(texto[i] in alfabeto) and not(texto[i] in reservado)):
                 se='erro na linha {}: caracter invalido em {}'.format(linha,texto[i])
                 erro.append(se)
-                print(texto[i] + ' - ' + 'erro')
+                #print(texto[i] + ' - ' + 'erro')
                 retorno='erro_lexico'
             else:
                 token=token+texto[i]
@@ -41,38 +41,38 @@ def Analisador_Lexico(i):
                         if(token=='end.'):
                             i=i-1
                             token=token[:-1]
-                        if((token in relacional) and (texto[i+1] in relacao)):
+                        if((token in relacional) and (texto[i+1] in relacional)):
                             i=i+1
                             token=token+texto[i]
-                        print(token + ' - ' + token)
+                        #print(token + ' - ' + token)
                         retorno=token
                     elif(list(filter(token.startswith,num))!= []):
                         if(not(any(l in [c for c in token] for l in ch))):
                             if('.' in token):
                                 if(not(token.endswith('.'))):
-                                    print(token + ' - ' + 'real')
+                                    #print(token + ' - ' + 'real')
                                     retorno='real'
                                 else:
                                     se='erro na linha {}: numero real incompleto em {}'.format(linha,token)
                                     erro.append(se)
-                                    print(token + ' - ' + 'erro')
+                                    #print(token + ' - ' + 'erro')
                                     retorno='erro_lexico'
                             else:
-                                print(token + ' - ' + 'inteiro')
+                                #print(token + ' - ' + 'inteiro')
                                 retorno='integer'
                         else:
                             se='erro na linha {}: numero mal formado em {}'.format(linha,token)
                             erro.append(se)
-                            print(token + ' - ' + 'erro')
+                            #print(token + ' - ' + 'erro')
                             retorno='erro_lexico'
                     else:
                         if(not('.' in token)):
-                            print(token + ' - ' + 'identificador')
+                            #print(token + ' - ' + 'identificador')
                             retorno='ident'
                         else:
                             se='erro na linha {}:identificador mal formado em {}'.format(linha,token)
                             erro.append(se)
-                            print(token + ' - ' + 'erro')
+                            #print(token + ' - ' + 'erro')
                             retorno='erro_lexico'
                     achou=True
                     token=''
@@ -298,6 +298,7 @@ def argumentos():
 def tipo_var():
     global i,ret,i_ant
     if(not(ret=='integer' or ret=='real')):
+        #print(ret)
         se='erro na linha {}: esperado "integer" ou "real" mas foi obtido "{}"'.format(linha,ret)
         erro.append(se)
 
@@ -306,6 +307,7 @@ def mais_var():
     if(ret==','):
         i_ant=i
         i,ret=Analisador_Lexico(i)
+        #print(ret)
         variaveis()
     else:
         i=i_ant
@@ -317,24 +319,35 @@ def variaveis():
         erro.append(se)
     i_ant=i
     i,ret=Analisador_Lexico(i)
+    #print(ret)
     mais_var()
 
 def dc_v():
     global i,ret,i_ant
     if(ret=='var'):
+        #print(ret)
         i_ant=i
         i,ret=Analisador_Lexico(i)
+        #print(ret)
         variaveis()
         i_ant=i
         i,ret=Analisador_Lexico(i)
+        #print(ret)
         if(not(ret==':')):
             se='erro na linha {}: esperado ":" mas foi obtido "{}"'.format(linha,ret)
             erro.append(se)
         i_ant=i
         i,ret=Analisador_Lexico(i)
+        #print(ret)
         tipo_var()
         i_ant=i
         i,ret=Analisador_Lexico(i)
+        if(not(ret==';')):
+            se='erro na linha {}: esperado ";" mas foi obtido "{}"'.format(linha,ret)
+            erro.append(se)
+        i_ant=i
+        i,ret=Analisador_Lexico(i)
+        #print(ret)
         dc_v()
     else:
         i=i_ant
@@ -386,6 +399,7 @@ def corpo_p():
     dc_loc()
     i_ant=i
     i,ret=Analisador_Lexico(i)
+    print(ret)
     if(not(ret=='begin')):
         se='erro na linha {}: esperado "begin" mas foi obtido "{}"'.format(linha,ret)
         erro.append(se)
@@ -480,11 +494,12 @@ def programa():
         se='erro na linha {}: esperado "." mas foi obtido "{}"'.format(linha,ret)
         erro.append(se)
 
-i_ant=i
-i,ret=Analisador_Lexico(i)
-print(ret)
-#programa()
+#i_ant=i
+#i,ret=Analisador_Lexico(i)
+#print(ret)
+programa()
 print('\nerros: ')
-print(erro)
+for er in erro:
+    print(er)
 
 
