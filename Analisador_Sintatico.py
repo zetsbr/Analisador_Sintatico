@@ -411,6 +411,7 @@ def corpo():
     
 def programa():
     global i, ret,i_ant
+    print('Processo de análise sintática sendo realizado, por favor aguarde')
     consome_simbolo()
     if(not(ret=='program')):
         se='erro na linha {}: esperado "program" mas foi obtido "{}"'.format(linha,ret)
@@ -429,9 +430,8 @@ def programa():
     if(not(ret=='.')):
         se='erro na linha {}: esperado "." mas foi obtido "{}"'.format(linha,ret)
         erro.append(se)
+    print('Processo de análise sintática finalizda, imprimindo lista de erros'
 
-#i_ant=i
-#i,ret=Analisador_Lexico(i)
 programa()
 print('\nerros: ')
 for er in erro:
