@@ -34,7 +34,7 @@ while(i<len(texto)):
                     if(token=='end.'):
                         i=i-1
                         token=token[:-1]
-                    if((token in relacao) and (texto[i+1] in relacao)):
+                    if((token in relacao) and (texto[i+1] in relacao) or (token+texto[i+1] in separador)):
                         i=i+1
                         token=token+texto[i]
                     print(token + ' - ' + token)

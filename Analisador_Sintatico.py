@@ -41,7 +41,7 @@ def Analisador_Lexico(i):
                         if(token=='end.'):
                             i=i-1
                             token=token[:-1]
-                        if((token in relacional) and (texto[i+1] in relacional)):
+                        if((token in relacional) and (texto[i+1] in relacional) or (token+texto[i+1] in separador)):
                             i=i+1
                             token=token+texto[i]
                         #print(token + ' - ' + token)
@@ -188,7 +188,10 @@ def comandos():
         
 def cmd():
     global i,ret,i_ant
+    print(ret)
     if(ret=='read'):
+        i_ant=i
+        i,ret=Analisador_Lexico(i)
         if(not(ret=='(')):
             se='erro na linha {}: esperado "(" mas foi obtido "{}"'.format(linha,ret)
             erro.append(se)
@@ -201,6 +204,8 @@ def cmd():
             se='erro na linha {}: esperado ")" mas foi obtido "{}"'.format(linha,ret)
             erro.append(se)
     elif(ret=='write'):
+        i_ant=i
+        i,ret=Analisador_Lexico(i)
         if(not(ret=='(')):
             se='erro na linha {}: esperado "(" mas foi obtido "{}"'.format(linha,ret)
             erro.append(se)
@@ -213,6 +218,8 @@ def cmd():
             se='erro na linha {}: esperado ")" mas foi obtido "{}"'.format(linha,ret)
             erro.append(se)
     elif(ret=='while'):
+        i_ant=i
+        i,ret=Analisador_Lexico(i)
         condicao()
         i_ant=i
         i,ret=Analisador_Lexico(i)
@@ -223,6 +230,8 @@ def cmd():
         i,ret=Analisador_Lexico(i)
         cmd()
     elif(ret=='if'):
+        i_ant=i
+        i,ret=Analisador_Lexico(i)
         condicao()
         i_ant=i
         i,ret=Analisador_Lexico(i)
@@ -245,6 +254,8 @@ def cmd():
         else:
             lista_arg()
     elif(ret=='begin'):
+        i_ant=i
+        i,ret=Analisador_Lexico(i)
         i_ant=i
         i,ret=Analisador_Lexico(i)
         comandos()
@@ -298,7 +309,6 @@ def argumentos():
 def tipo_var():
     global i,ret,i_ant
     if(not(ret=='integer' or ret=='real')):
-        #print(ret)
         se='erro na linha {}: esperado "integer" ou "real" mas foi obtido "{}"'.format(linha,ret)
         erro.append(se)
 
@@ -307,7 +317,6 @@ def mais_var():
     if(ret==','):
         i_ant=i
         i,ret=Analisador_Lexico(i)
-        #print(ret)
         variaveis()
     else:
         i=i_ant
@@ -319,26 +328,21 @@ def variaveis():
         erro.append(se)
     i_ant=i
     i,ret=Analisador_Lexico(i)
-    #print(ret)
     mais_var()
 
 def dc_v():
     global i,ret,i_ant
     if(ret=='var'):
-        #print(ret)
         i_ant=i
         i,ret=Analisador_Lexico(i)
-        #print(ret)
         variaveis()
         i_ant=i
         i,ret=Analisador_Lexico(i)
-        #print(ret)
         if(not(ret==':')):
             se='erro na linha {}: esperado ":" mas foi obtido "{}"'.format(linha,ret)
             erro.append(se)
         i_ant=i
         i,ret=Analisador_Lexico(i)
-        #print(ret)
         tipo_var()
         i_ant=i
         i,ret=Analisador_Lexico(i)
@@ -347,7 +351,6 @@ def dc_v():
             erro.append(se)
         i_ant=i
         i,ret=Analisador_Lexico(i)
-        #print(ret)
         dc_v()
     else:
         i=i_ant
@@ -399,7 +402,6 @@ def corpo_p():
     dc_loc()
     i_ant=i
     i,ret=Analisador_Lexico(i)
-    print(ret)
     if(not(ret=='begin')):
         se='erro na linha {}: esperado "begin" mas foi obtido "{}"'.format(linha,ret)
         erro.append(se)
@@ -490,6 +492,7 @@ def programa():
     corpo()
     i_ant=i
     i,ret=Analisador_Lexico(i)
+    print(linha)
     if(not(ret=='.')):
         se='erro na linha {}: esperado "." mas foi obtido "{}"'.format(linha,ret)
         erro.append(se)
