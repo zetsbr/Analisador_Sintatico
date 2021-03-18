@@ -478,8 +478,12 @@ def programa():
     if(not(ret=='.')):
         se='erro na linha {}: esperado "." mas foi obtido "{}"'.format(linha,ret)
         erro.append(se)
-        
+
+i_ant=i
+i,ret=Analisador_Lexico(i)
+print(ret)
+#programa()
 print('\nerros: ')
 print(erro)
 
-#de condicao pra frente falta aindaa
+
