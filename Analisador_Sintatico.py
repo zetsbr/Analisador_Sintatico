@@ -430,7 +430,7 @@ def programa():
     if(not(ret=='.')):
         se='erro na linha {}: esperado "." mas foi obtido "{}"'.format(linha,ret)
         erro.append(se)
-    print('Processo de análise sintática finalizda, imprimindo lista de erros'
+    print('Processo de análise sintática finalizda, imprimindo lista de erros')
 
 programa()
 print('\nerros: ')
