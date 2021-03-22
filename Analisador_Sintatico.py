@@ -17,13 +17,13 @@ texto=texto+'\n'
 i=0
 i_ant=i
 ret=''
-ret_ant=ret
+linha_ant=linha
 def Analisador_Lexico(i):
-    global texto, erro, linha, reservado, relacional, separador, cmd, operador, alfabeto, ret_ant
+    global texto, erro, linha, reservado, relacional, separador, cmd, operador, alfabeto, linha_ant
     achou=False
     token=''
     retorno=''
-    ret_ant=ret
+    linha_ant=linha
     while(i<len(texto) and not(achou)):
         if((texto[i]=='\n')):
             linha=linha+1
@@ -83,31 +83,32 @@ def consome_simbolo():
         i_ant=i
         i,ret=Analisador_Lexico(i)
 
+def insere_erro(se):
+    global i,ret,i_ant,linha
+    se='erro na linha {}: esperado {} mas foi obtido "{}"'.format(linha,se,ret)
+    erro.append(se)
+    i=i_ant
+    if(linha_ant!=linha):
+        linha=linha-1
+
 def fator():
-    global i,ret,i_ant
+    global i,ret,i_ant,linha
     if(ret=='(' or ret=='ident' or ret=='integer' or ret=='real'):
         if(ret=='('):
             consome_simbolo()
             expressao()
             consome_simbolo()
             if(not(ret==')')):
-                se='erro na linha {}: esperado ")" mas foi obtido "{}"'.format(linha,ret)
-                erro.append(se)
-                i=i_ant
+                insere_erro('")"')
     else:
-        se='erro na linha {}: esperado "(" ou "ident" ou "integer" ou "real" mas foi obtido "{}"'.format(linha,ret)
-        erro.append(se)
-        i=i_ant
+        insere_erro('"(" ou "ident" ou "integer" ou "real"')
 
 def op_mul():
-    global i,ret,i_ant
     if(not(ret=='*' or ret=='/')):
-        se='erro na linha {}: esperado "*" ou "/" mas foi obtido "{}"'.format(linha,ret)
-        erro.append(se)
-        i=i_ant
+        insere_erro('"*" ou "/"')
 
 def mais_fatores():
-    global i,ret,i_ant
+    global i,linha
     if(ret=='*' or ret=='/'):
         op_mul()
         consome_simbolo()
@@ -116,9 +117,10 @@ def mais_fatores():
         mais_fatores()
     else:
         i=i_ant
+        if(linha_ant!=linha):
+            linha=linha-1
 
 def termo():
-    global i,ret,i_ant
     op_un()
     consome_simbolo()
     fator()
@@ -126,14 +128,11 @@ def termo():
     mais_fatores()
 
 def op_ad():
-    global i,ret,i_ant
     if(not(ret=='+' or ret=='-')):
-        se='erro na linha {}: esperado "+" ou "-" mas foi obtido "{}"'.format(linha,ret)
-        erro.append(se)
-        i=i_ant
+        insere_erro('"+" ou "-"')     
 
 def outros_termos():
-    global i,ret,i_ant
+    global i,linha
     if(ret=='+' or ret=='-'):
         op_ad()
         consome_simbolo()
@@ -142,27 +141,26 @@ def outros_termos():
         outros_termos()
     else:
         i=i_ant
+        if(linha_ant!=linha):
+            linha=linha-1
 
 def op_un():
-    global i,ret,i_ant
+    global i,linha
     if(not(ret=='+' or ret=='-')):
         i=i_ant
+        if(linha_ant!=linha):
+            linha=linha-1
 
 def expressao():
-    global i,ret,i_ant
     termo()
     consome_simbolo()
     outros_termos()
 
 def relacao():
-    global i,ret,i_ant
     if(not(ret=='=' or ret=='<>' or ret=='>=' or ret=='<=' or ret=='>' or ret=='<')):
-        se='erro na linha {}: esperado "=" ou "<>" ou ">=" ou "<=" ou ">" ou "<" mas foi obtido "{}"'.format(linha,ret)
-        erro.append(se)
-        i=i_ant
+        insere_erro('"=" ou "<>" ou ">=" ou "<=" ou ">" ou "<"')
 
 def condicao():
-    global i,ret,i_ant
     expressao()
     consome_simbolo()
     relacao()
@@ -170,55 +168,45 @@ def condicao():
     expressao()
 
 def comandos():
-    global i,ret,i_ant
+    global i,linha
     if(ret=='read' or ret=='write' or ret=='while' or ret=='if' or ret=='ident' or ret=='begin'):
         cmd()
         consome_simbolo()
         if(not(ret==';')):
-            se='erro na linha {}: esperado ";" mas foi obtido "{}"'.format(linha,ret)
-            erro.append(se)
-            i=i_ant
+            insere_erro('";"')
         consome_simbolo()
         comandos()
     else:
         i=i_ant
+        if(linha_ant!=linha):
+            linha=linha-1
         
 def cmd():
-    global i,ret,i_ant
+    global i,linha
     if(ret=='read'):
         consome_simbolo()
         if(not(ret=='(')):
-            se='erro na linha {}: esperado "(" mas foi obtido "{}"'.format(linha,ret)
-            erro.append(se)
-            i=i_ant
+            insere_erro('"("')
         consome_simbolo()
         variaveis()
         consome_simbolo()
         if(not(ret==')')):
-            se='erro na linha {}: esperado ")" mas foi obtido "{}"'.format(linha,ret)
-            erro.append(se)
-            i=i_ant
+            insere_erro('")"')
     elif(ret=='write'):
         consome_simbolo()
         if(not(ret=='(')):
-            se='erro na linha {}: esperado "(" mas foi obtido "{}"'.format(linha,ret)
-            erro.append(se)
-            i=i_ant
+            insere_erro('"("')
         consome_simbolo()
         variaveis()
         consome_simbolo()
         if(not(ret==')')):
-            se='erro na linha {}: esperado ")" mas foi obtido "{}"'.format(linha,ret)
-            erro.append(se)
-            i=i_ant
+            insere_erro('")"')
     elif(ret=='while'):
         consome_simbolo()
         condicao()
         consome_simbolo()
         if(not(ret=='do')):
-            se='erro na linha {}: esperado "do" mas foi obtido "{}"'.format(linha,ret)
-            erro.append(se)
-            i=i_ant
+            insere_erro('"do"')
         consome_simbolo()
         cmd()
     elif(ret=='if'):
@@ -226,9 +214,7 @@ def cmd():
         condicao()
         consome_simbolo()
         if(not(ret=='then')):
-            se='erro na linha {}: esperado "then" mas foi obtido "{}"'.format(linha,ret)
-            erro.append(se)
-            i=i_ant
+            insere_erro('"then"')
         consome_simbolo()
         cmd()
         consome_simbolo()
@@ -238,233 +224,206 @@ def cmd():
         if(ret==':='):
             consome_simbolo()
             expressao()
-        else:
+        elif(ret=='('):
             lista_arg()
+        else:
+            insere_erro('":=" ou "("')
+            while(ret!=';'):
+                consome_simbolo()
+            i=i_ant
+            if(linha_ant!=linha):
+                linha=linha-1
     elif(ret=='begin'):
         consome_simbolo()
         comandos()
         consome_simbolo()
         if(not(ret=='end')):
-            se='erro na linha {}: esperado "end" mas foi obtido "{}"'.format(linha,ret)
-            erro.append(se)
-            i=i_ant
+            insere_erro('"end"')
     
 def lista_arg():
-    global i,ret,i_ant
+    global i,linha
     if(ret=='('):
         consome_simbolo()
         argumentos()
         consome_simbolo()
         if(not(ret==')')):
-            se='erro na linha {}: esperado ")" mas foi obtido "{}"'.format(linha,ret)
-            erro.append(se)
-            i=i_ant
+            insere_erro('")"')
     else:
         i=i_ant
+        if(linha_ant!=linha):
+            linha=linha-1
 
 def mais_ident():
-    global i,ret,i_ant
+    global i,linha
     if(ret==';'):
         consome_simbolo()
         argumentos()
     else:
         i=i_ant
+        if(linha_ant!=linha):
+            linha=linha-1
 
 def pfalsa():
-    global i,ret,i_ant
+    global i,linha
     if(ret=='else'):
         consome_simbolo()
         cmd()
     else:
         i=i_ant
+        if(linha_ant!=linha):
+            linha=linha-1
 
 def argumentos():
-    global i,ret,i_ant
     if(not(ret=='ident')):
-        se='erro na linha {}: esperado "ident" mas foi obtido "{}"'.format(linha,ret)
-        erro.append(se)
-        i=i_ant
+        insere_erro('"ident"')
     consome_simbolo()
     mais_ident()
 
 def tipo_var():
-    global i,ret,i_ant
     if(not(ret=='integer' or ret=='real')):
-        se='erro na linha {}: esperado "integer" ou "real" mas foi obtido "{}"'.format(linha,ret)
-        erro.append(se)
-        i=i_ant
+        insere_erro('"integer" ou "real"')
 
 def mais_var():
-    global i,ret,i_ant
+    global i,linha
     if(ret==','):
         consome_simbolo()
         variaveis()
     else:
         i=i_ant
+        if(linha_ant!=linha):
+            linha=linha-1
         
 def variaveis():
-    global i,ret,i_ant
     if(not(ret=='ident')):
-        se='erro na linha {}: esperado "ident" mas foi obtido "{}"'.format(linha,ret)
-        erro.append(se)
-        i=i_ant
+        insere_erro('"ident"')
     consome_simbolo()
     mais_var()
 
 def dc_v():
-    global i,ret,i_ant
+    global i,linha
     if(ret=='var'):
         consome_simbolo()
         variaveis()
         consome_simbolo()
         if(not(ret==':')):
-            se='erro na linha {}: esperado ":" mas foi obtido "{}"'.format(linha,ret)
-            erro.append(se)
-            i=i_ant
+            insere_erro('":"')
         consome_simbolo()
         tipo_var()
         consome_simbolo()
         if(not(ret==';')):
-            se='erro na linha {}: esperado ";" mas foi obtido "{}"'.format(linha,ret)
-            erro.append(se)
-            i=i_ant
+            insere_erro('";"')
         consome_simbolo()
         dc_v()
     elif(not(ret=='procedure')):
         i=i_ant
+        if(linha_ant!=linha):
+            linha=linha-1
 
 def lista_par():
-    global i,ret,i_ant
     variaveis()
     consome_simbolo()
     if(not(ret==':')):
-        se='erro na linha {}: esperado ":" mas foi obtido "{}"'.format(linha,ret)
-        erro.append(se)
-        i=i_ant
+        insere_erro('":"')
     consome_simbolo()
     tipo_var()
     consome_simbolo()
     mais_par()
 
 def mais_par():
-    global i,ret,i_ant
+    global i,linha
     if(ret==';'):
         consome_simbolo()
         lista_par()
     else:
         i=i_ant
+        if(linha_ant!=linha):
+            linha=linha-1
 
 def parametros():
-    global i,ret,i_ant
+    global i,linha
     if(ret=='('):
         consome_simbolo()
         lista_par()
         consome_simbolo()
         if(not(ret==')')):
-            se='erro na linha {}: esperado ")" mas foi obtido "{}"'.format(linha,ret)
-            erro.append(se)
-            i=i_ant
+            insere_erro('")"')
     else:
         i=i_ant
+        if(linha_ant!=linha):
+            linha=linha-1
 
 def dc_loc():
-    global i,ret,i_ant
     dc_v()
 
 def corpo_p():
-    global i,ret,i_ant
     dc_loc()
     consome_simbolo()
     if(not(ret=='begin')):
-        se='erro na linha {}: esperado "begin" mas foi obtido "{}"'.format(linha,ret)
-        erro.append(se)
-        i=i_ant
+        insere_erro('"begin"')
     consome_simbolo()
     comandos()
     consome_simbolo()
     if(not(ret=='end')):
-        se='erro na linha {}: esperado "end" mas foi obtido "{}"'.format(linha,ret)
-        erro.append(se)
-        i=i_ant
+        insere_erro('"end"')
     consome_simbolo()
     if(not(ret==';')):
-        se='erro na linha {}: esperado ";" mas foi obtido "{}"'.format(linha,ret)
-        erro.append(se)
-        i=i_ant
-
+        insere_erro('";"')
+        
 def dc_p():
-    global i,ret,i_ant
+    global i,linha
     if(ret=='procedure'):
         consome_simbolo()
         if(not(ret=='ident')):
-            se='erro na linha {}: esperado "ident" mas foi obtido "{}"'.format(linha,ret)
-            erro.append(se)
-            i=i_ant
+            insere_erro('"ident"')
         consome_simbolo()
         parametros()
         consome_simbolo()
         if(not(ret==';')):
-            se='erro na linha {}: esperado ";" mas foi obtido "{}"'.format(linha,ret)
-            erro.append(se)
-            i=i_ant
+            insere_erro('";"')
         consome_simbolo()
         corpo_p()
         consome_simbolo()
         dc_p()
     else:
         i=i_ant
+        if(linha_ant!=linha):
+            linha=linha-1
 
 def dc():
-    global i,ret,i_ant
+    global i,ret,i_ant,linha
     if(ret=='var' or ret=='procedure'):
         dc_v()
         dc_p()
     else:
-        se='erro na linha {}: esperado "var" ou "procedure" mas foi obtido "{}"'.format(linha,ret)
-        erro.append(se)
-        i=i_ant
+        insere_erro('""var" ou "procedure""')
 
 def corpo():
-    global i,ret,i_ant
     dc()
     consome_simbolo()
     if(not(ret=='begin')):
-        se='erro na linha {}: esperado "begin" mas foi obtido "{}"'.format(linha,ret)
-        erro.append(se)
-        i=i_ant
+        insere_erro('"begin"')
     consome_simbolo()
     comandos()
     consome_simbolo()
     if(not(ret=='end')):
-        se='erro na linha {}: esperado "end" mas foi obtido "{}"'.format(linha,ret)
-        erro.append(se)
-        i=i_ant
+        insere_erro('"end"')
     
 def programa():
-    global i, ret,i_ant
     print('Processo de análise sintática sendo realizado, por favor aguarde')
     consome_simbolo()
     if(not(ret=='program')):
-        se='erro na linha {}: esperado "program" mas foi obtido "{}"'.format(linha,ret)
-        erro.append(se)
-        i=i_ant
+        insere_erro('"program"')
     consome_simbolo()
     if(not(ret=='ident')):
-        se='erro na linha {}: esperado "ident" mas foi obtido "{}"'.format(linha,ret)
-        erro.append(se)
-        i=i_ant
+        insere_erro('"ident"')
     consome_simbolo()
     if(not(ret==';')):
-        se='erro na linha {}: esperado ";" mas foi obtido "{}"'.format(linha,ret)
-        erro.append(se)
-        i=i_ant
+        insere_erro('";"')
     consome_simbolo()
     corpo()
     consome_simbolo()
     if(not(ret=='.')):
-        se='erro na linha {}: esperado "." mas foi obtido "{}"'.format(linha,ret)
-        erro.append(se)
-        i=i_ant
+        insere_erro('"."')
     print('Processo de análise sintática finalizda, imprimindo lista de erros')
 
 programa()
