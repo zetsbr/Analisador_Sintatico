@@ -1,7 +1,7 @@
 #autor: João Vitor de Andrade Porto
 #para usar favor tenhar um arquivo chamado txt.txt contendo o código em lalgol
 num=['1','2','3','4','5','6','7','8','9','0','.']
-ch=['q','w','e','r','t','y','u','i','o','p','a','s','d','f','g','h','j','k','l','z','x','c','v','b','n','m']
+ch=['q','w','e','r','t','y','u','i','o','p','a','s','d','f','g','h','j','k','l','z','x','c','v','b','n','m','ç']
 alfabeto=ch+num
 operador=['+','-','*','/']
 cmd=['read','write','if','then','else','while','do','begin','end','procedure','program','real','integer','var']
