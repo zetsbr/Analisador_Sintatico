@@ -424,7 +424,7 @@ def programa():
     consome_simbolo()
     if(not(ret=='.')):
         insere_erro('"."')
-    print('Processo de análise sintática finalizda, imprimindo lista de erros')
+    print('Processo de análise sintática finalizada, imprimindo lista de erros')
 
 programa()
 print(linha)
