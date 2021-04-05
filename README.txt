@@ -10,3 +10,5 @@ No caso do windows recomendo abrir o IDLE que é um editor de texto que vem junt
 Abrir o código nele e executar através do atalho de teclado ou da opção no menu superior da janela
 
 Para ler um código com para teste coloque ele dentro do arquivo txt.txt, Os erros identificados serão mostrados ao fim da execução indicando qual o tipo e a linha que se encontra
+
+Para o teste foram utilizados os codigos de exemplo assim como foram mostrados e algumas versões com erros forçados para teste das funções
