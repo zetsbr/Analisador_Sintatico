@@ -9,5 +9,4 @@ Execução:
 No caso do windows recomendo abrir o IDLE que é um editor de texto que vem junto do python
 Abrir o código nele e executar através do atalho de teclado ou da opção no menu superior da janela
 
-Para ler um código com para teste coloque ele dentro do arquivo txt.txt
-Seus tokens e erros serão demonstrados na tela e para o caso dos erros haverá uma descrição mais detalhada ao fim da execução
+Para ler um código com para teste coloque ele dentro do arquivo txt.txt, Os erros identificados serão mostrados ao fim da execução indicando qual o tipo e a linha que se encontra
